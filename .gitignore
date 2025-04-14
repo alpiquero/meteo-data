@@ -1,2 +1,5 @@
 .venv/
 pyvenv.cfg
+
+.terraform.lock.hcl
+.terraform/
