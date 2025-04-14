@@ -18,15 +18,18 @@ resource "azurerm_subnet" "this" {
 }
 
 resource "azurerm_public_ip" "this" {
-  name                = "meteo-data"
+  name                = "vmnet-1"
   resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location
   allocation_method   = "Dynamic"
 
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "azurerm_network_interface" "this" {
-  name                = "public-nic"
+  name                = "vmnic-1"
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
 
@@ -43,15 +46,11 @@ resource "azurerm_linux_virtual_machine" "this" {
   resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location
   size                = "Standard_B1s"
-  admin_username      = "piquero"
+  admin_username      = var.vm_admin_username
+  admin_password      = var.vm_admin_password
   network_interface_ids = [
     azurerm_network_interface.this.id,
   ]
-
-  admin_ssh_key {
-    username   = "piquero"
-    public_key = file("~/.ssh/id_rsa.pub")
-  }
 
   os_disk {
     caching              = "ReadWrite"
@@ -64,5 +63,61 @@ resource "azurerm_linux_virtual_machine" "this" {
     sku       = "22_04-lts"
     version   = "latest"
   }
+
+  user_data = filebase64("${path.module}/files/cloudinit.yaml")
+}
+
+resource "azurerm_network_security_group" "this" {
+  name                = "nsg-vm-subnet"
+  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
+
+  security_rule {
+    name                   = "Allow_SSH"
+    access                 = "Allow"
+    priority               = 500
+    protocol               = "Tcp"
+    direction              = "Inbound"
+    description            = "Allow SSH inbound"
+    source_port_range      = "*"
+    destination_port_range = "22"
+  }
+
+  security_rule {
+    name                   = "Allow_Grafana"
+    access                 = "Allow"
+    priority               = 550
+    protocol               = "Tcp"
+    direction              = "Inbound"
+    description            = "Allow Grafana inbound"
+    source_port_range      = "*"
+    destination_port_range = "3000"
+  }
+
+  security_rule {
+    name                   = "Allow_All_Outbound"
+    access                 = "Allow"
+    priority               = 900
+    protocol               = "*"
+    direction              = "Inbound"
+    description            = "Allow all outbound traffic"
+    source_port_range      = "*"
+    destination_port_range = "*"
+  }
+  security_rule {
+    name                   = "Deny_All_Inbound"
+    access                 = "Deny"
+    priority               = 1000
+    protocol               = "*"
+    direction              = "Inbound"
+    description            = "Deny all inbound traffic"
+    source_port_range      = "*"
+    destination_port_range = "*"
+  }
+}
+
+resource "azurerm_subnet_network_security_group_association" "this" {
+  network_security_group_id = azurerm_network_security_group.this.id
+  subnet_id                 = azurerm_subnet.this.id
 }
 
