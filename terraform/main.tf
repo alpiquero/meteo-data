@@ -1,3 +1,15 @@
+locals {
+  vm_admin_password = var.vm_admin_password != null ? var.vm_admin_password : random_password.password[0].result
+}
+
+
+resource "random_password" "password" {
+  count            = var.vm_admin_password != null ? 0 : 1
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 resource "azurerm_resource_group" "this" {
   name     = "meteo-data"
   location = "West Europe"
@@ -47,7 +59,7 @@ resource "azurerm_linux_virtual_machine" "this" {
   location            = azurerm_resource_group.this.location
   size                = "Standard_B1s"
   admin_username      = var.vm_admin_username
-  admin_password      = var.vm_admin_password
+  admin_password      = local.vm_admin_password
   network_interface_ids = [
     azurerm_network_interface.this.id,
   ]
@@ -99,7 +111,7 @@ resource "azurerm_network_security_group" "this" {
     access                 = "Allow"
     priority               = 900
     protocol               = "*"
-    direction              = "Inbound"
+    direction              = "Outbound"
     description            = "Allow all outbound traffic"
     source_port_range      = "*"
     destination_port_range = "*"
