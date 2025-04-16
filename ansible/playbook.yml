@@ -16,6 +16,11 @@
     ansible_password: "{{ password }}"
     # All actions will be performed by root
     ansible_become: true
+    copy_files:
+      - { source: '../compose.yaml', dest: '/opt/meteo-data/compose.yaml' }
+      - { source: '../weather', dest: '/opt/meteo-data/weather' }
+      - { source: '../grafana', dest: '/opt/meteo-data/grafana' }
+      - { source: '../prometheus', dest: '/opt/meteo-data/prometheus' }
 
   # This playbook is so simple that we do not need roles here
   tasks:
@@ -26,9 +31,7 @@
       owner: root
       group: root
       mode: '0644'
-    loop:
-      - { source: '../compose.yaml', dest: '/opt/meteo-data/compose.yaml' }
-      - { source: '../weather', dest: '/opt/meteo-data/weather' }
+    loop: copy_files
     register: copy_result
   
   - name: Restart service
