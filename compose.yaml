@@ -32,6 +32,7 @@ services:
       - ./grafana:/etc/grafana/provisioning/datasources
   weather:
     build: ./weather/
+    pull_policy: build
     container_name: weather
     restart: unless-stopped
     environment:
