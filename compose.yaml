@@ -29,7 +29,9 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=grafana
       - GF_ANALYTICS_REPORTING_ENABLED=false
     volumes:
-      - ./grafana:/etc/grafana/provisioning/datasources
+      - ./grafana/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
   weather:
     build: ./weather/
     pull_policy: build
@@ -37,6 +39,6 @@ services:
     restart: unless-stopped
     environment:
       - PUSHGATEWAY_URL=pushgateway:9091
-      - PERIOD_SECONDS=5
+      - PERIOD_SECONDS=900
 volumes:
   prom_data:
