@@ -77,6 +77,10 @@ resource "azurerm_linux_virtual_machine" "this" {
   }
 
   user_data = filebase64("${path.module}/files/cloudinit.yaml")
+
+  tags = {
+    applicationRole = "meteo-data"
+  }
 }
 
 resource "azurerm_network_security_group" "this" {

@@ -1,0 +1,38 @@
+---
+- hosts: meteo-data
+  gather_facts: false
+
+  # Interactively ask for user credentials
+  vars_prompt:
+    - name: username
+      prompt: "Enter virtual machine admin username"
+      private: false
+    - name: password
+      prompt: "Enter password"
+
+  vars:
+    # Remap username and password variables
+    ansible_user: "{{ username }}"
+    ansible_password: "{{ password }}"
+    # All actions will be performed by root
+    ansible_become: true
+
+  # This playbook is so simple that we do not need roles here
+  tasks:
+  - name: Copy source and compose files
+    ansible.builtin.copy:
+      src: "{{ item.source }}"
+      dest: "{{ item.dest }}"
+      owner: root
+      group: root
+      mode: '0644'
+    loop:
+      - { source: '../compose.yaml', dest: '/opt/meteo-data/compose.yaml' }
+      - { source: '../weather', dest: '/opt/meteo-data/weather' }
+    register: copy_result
+  
+  - name: Restart service
+    community.docker.docker_compose_v2:
+      project_src: "/opt/meteo-data/"
+      state: "{{ 'restarted' if copy_result.changed else 'present'}}"
+ 

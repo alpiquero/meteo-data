@@ -1,0 +1,8 @@
+plugin: azure_rm
+include_vm_resource_groups:
+  - meteo-data
+auth_source: auto
+# This will generate a group named "meteo-data" as aplicationRole tag value for the VM name is "meteo-data"
+keyed_groups:
+  - key: tags.applicationRole
+
