@@ -34,7 +34,7 @@ python main.py
 
 We use environment variables to configure some service values. The default values will be used if not custom ones are specified.
 
-* `PERIOD_SECONDS`: The number of seconds that the service fetches data from **Open-Meteo**. (Default: 1)
+* `PERIOD_SECONDS`: The number of seconds for the service to fetch data from **Open-Meteo**. (Default: 1)
 * `PUSHGATEWAY_URL`: The pushgateway service URL. (Default: http://localhost)
 
 Example:
