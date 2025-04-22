@@ -1,5 +1,5 @@
 ---
-- hosts: meteo-data
+- hosts: meteo-data # Uses the meteo-data group generated from Azure dynmic inventory
   gather_facts: false
 
   # Interactively ask for user credentials
@@ -16,26 +16,41 @@
     ansible_password: "{{ password }}"
     # All actions will be performed by root
     ansible_become: true
+    dest_dir: '/opt/meteo-data'
     copy_files:
-      - { source: '../compose.yaml', dest: '/opt/meteo-data/compose.yaml' }
-      - { source: '../weather', dest: '/opt/meteo-data/weather' }
-      - { source: '../grafana', dest: '/opt/meteo-data/grafana' }
-      - { source: '../prometheus', dest: '/opt/meteo-data/prometheus' }
+      - '../compose.yaml'
+      - '../weather'
+      - '../grafana'
+      - '../prometheus'
 
   # This playbook is so simple that we do not need roles here
   tasks:
+  - name: Ensures {{ dest_dir }} foder exists
+    file:
+      path: "{{ dest_dir }}"
+      state: directory
+
   - name: Copy source and compose files
     ansible.builtin.copy:
-      src: "{{ item.source }}"
-      dest: "{{ item.dest }}"
+      src: "{{ item }}"
+      dest: "{{ dest_dir }}"
       owner: root
       group: root
       mode: '0644'
-    loop: copy_files
+    loop: "{{ copy_files }}"
     register: copy_result
-  
-  - name: Restart service
+
+  - name: Ensure service is up
     community.docker.docker_compose_v2:
-      project_src: "/opt/meteo-data/"
-      state: "{{ 'restarted' if copy_result.changed else 'present'}}"
+      project_src: "{{ dest_dir }}"
+      state: present
+      build: always
+    register: compose_up_result
  
+  - name: Restart service if copy changes and this is not the first start
+    community.docker.docker_compose_v2:
+      project_src: "{{ dest_dir }}"
+      state: restarted
+      build: always
+    when: copy_result is changed and compose_up_result is not changed
+ # Uses the meteo-data group generated from Azure dynmic inventory

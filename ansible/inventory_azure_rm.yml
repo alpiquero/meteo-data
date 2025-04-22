@@ -1,5 +1,6 @@
 plugin: azure_rm
 include_vm_resource_groups:
+  # The name of the Azure resource group we created with Terraform 
   - meteo-data
 auth_source: auto
 # This will generate a group named "meteo-data" as aplicationRole tag value for the VM name is "meteo-data"

@@ -11,7 +11,7 @@ services:
       - ./prometheus:/etc/prometheus
       - prom_data:/prometheus
   pushgateway:
-    image: quay.io/prometheus/pushgateway
+    image: quay.io/prometheus/pushgateway:v1.11.1
     container_name: pushgateway
     ports:
       - 9091:9091
@@ -25,8 +25,10 @@ services:
       - 3000:3000
     restart: unless-stopped
     environment:
+      # Configure highly insecure credentials
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=grafana
+      # Disables analytics
       - GF_ANALYTICS_REPORTING_ENABLED=false
     volumes:
       - ./grafana/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
@@ -34,7 +36,6 @@ services:
       - ./grafana/dashboards:/var/lib/grafana/dashboards
   weather:
     build: ./weather/
-    pull_policy: build
     container_name: weather
     restart: unless-stopped
     environment:
