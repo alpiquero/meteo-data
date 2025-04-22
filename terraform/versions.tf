@@ -6,7 +6,7 @@ terraform {
       version = "~> 4.26.0"
     }
     random = {
-      source = "hashicorp/random"
+      source  = "hashicorp/random"
       version = "~> 3.7.1"
     }
   }
@@ -15,7 +15,7 @@ terraform {
 provider "azurerm" {
   # Configuration options
   subscription_id = ""
-  tenant_id = ""
+  tenant_id       = ""
   features {}
 }
 
