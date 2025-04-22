@@ -30,9 +30,9 @@ docker compose stop
 
 Point your browser to the following locations in order to see the following services running:
 
-* Grafana: [](http://localhost:3000): Login with the ultra secure `admin/grafana` user/password combination and go to `Dashboards/Tallin Temperature` to see the dashbords that represent the current Temperature in Tallinn.
-* Prometheus: [](http://localhost:9090)
-* Prometheus pushgateway: [](http://localhost:9091)
+* Grafana: http://localhost:3000. Login with the ultra secure `admin/grafana` user/password combination and go to `Dashboards/Tallin Temperature` to see the dashbords that represent the current Temperature in Tallinn.
+* Prometheus: http://localhost:9090
+* Prometheus pushgateway: http://localhost:9091
 
 ### Removing the services
 
